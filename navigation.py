@@ -3,6 +3,16 @@ import requests
 import flexpolyline as fp
 import math
 
+import serial
+import time
+arduino_port = "COM6"
+
+baud = 9600
+
+ser = serial.Serial(arduino_port, baud)
+print("Connected to Arduino port:" + arduino_port)
+time.sleep(2)
+
 # Change this to the server's IP address and port
 server_ip = "20.197.52.56"
 server_port = 3001
@@ -49,8 +59,8 @@ def get_route(start_coords, destination_coords):
 
 
 def initialize():
-    destination_coordinates[0] = input("Enter the longitude of the destination: ")
-    destination_coordinates[1] = input("Enter the longitude of the destination: ")
+    destination_coordinates[0] = input("Enter the latitude of the destination: ")
+    destination_coordinates[1] = input("Enter the longitudeof the destination: ")
     start_coordinates[0] = current_lat
     start_coordinates[1] = current_long
     get_directions(start_coordinates, destination_coordinates)
@@ -104,15 +114,19 @@ def navigate_user(current_lat, current_long):
     distance = R * c
     # print(distance)
     if distance <= threshold:
+            
         if step["action"] == "turn":
             print(
                 f"{step['action']} {step['direction']} at {decoded_polyLine[step['offset']]}"
             )
+            ser.write(bytes(step['direction'], 'utf-8'))
         elif step["action"] == "arrive":
             print("Arrived at destination")
+            ser.write(bytes("stop", 'utf-8'))
             exit(0)
         else:
             print(f"{step['action']} at {decoded_polyLine[step['offset']]}")
+            ser.write(bytes("forward", 'utf-8'))
         i += 1
         j += 1
 
