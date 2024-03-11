@@ -5,8 +5,8 @@ import math
 
 import serial
 import time
-arduino_port = "COM6"
 
+arduino_port = "COM6"
 baud = 9600
 
 ser = serial.Serial(arduino_port, baud)
@@ -59,8 +59,10 @@ def get_route(start_coords, destination_coords):
 
 
 def initialize():
-    destination_coordinates[0] = input("Enter the latitude of the destination: ")
-    destination_coordinates[1] = input("Enter the longitudeof the destination: ")
+    # destination_coordinates[0] = input("Enter the latitude of the destination: ")
+    # destination_coordinates[1] = input("Enter the longitudeof the destination: ")
+    destination_coordinates[0] = 12.968438991121475
+    destination_coordinates[1] = 79.15594289734427
     start_coordinates[0] = current_lat
     start_coordinates[1] = current_long
     get_directions(start_coordinates, destination_coordinates)
@@ -112,21 +114,20 @@ def navigate_user(current_lat, current_long):
     )
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     distance = R * c
-    # print(distance)
     if distance <= threshold:
-            
+
         if step["action"] == "turn":
             print(
                 f"{step['action']} {step['direction']} at {decoded_polyLine[step['offset']]}"
             )
-            ser.write(bytes(step['direction'], 'utf-8'))
+            ser.write(bytes(step["direction"], "utf-8"))
         elif step["action"] == "arrive":
             print("Arrived at destination")
-            ser.write(bytes("stop", 'utf-8'))
+            ser.write(bytes("stop", "utf-8"))
             exit(0)
         else:
             print(f"{step['action']} at {decoded_polyLine[step['offset']]}")
-            ser.write(bytes("forward", 'utf-8'))
+            ser.write(bytes("forward", "utf-8"))
         i += 1
         j += 1
 
@@ -135,14 +136,7 @@ while True:
     # Receive data from the server
     data = client_socket.recv(1024)
 
-    # Decode the received bytes into a string
-    # messages = data.decode("utf-8").split("\n")
-    # for msg in messages:
-    #     print(msg)
-
     received_data = data.decode("utf-8")
-
-    # print(f"Received data from server: {received_data}")
 
     current_coords = received_data.split(",")
     current_lat = float(current_coords[0])
