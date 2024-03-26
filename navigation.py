@@ -143,7 +143,6 @@ while True:
         current_lat = float(current_coords[0])
         current_long = float(current_coords[1])
     except:
-        current_coords = data.split(",")
         current_lat = float(current_coords[0])
         temp = current_coords[1].split(".")
         temp1 = float(temp[0].strip() + "." + temp[1][:-2])
