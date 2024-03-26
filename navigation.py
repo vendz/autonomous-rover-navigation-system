@@ -133,6 +133,9 @@ def navigate_user(current_lat, current_long):
         i += 1
         j += 1
 
+    # else:
+    #     ser.write(bytes("1", "utf-8"))
+
 while True:
     # Receive data from the server
     data = client_socket.recv(1024)
