@@ -57,7 +57,6 @@ def get_route(start_coords, destination_coords):
         print(f"Error: {response.status_code}")
         return None
 
-
 def initialize():
     # destination_coordinates[0] = input("Enter the latitude of the destination: ")
     # destination_coordinates[1] = input("Enter the longitudeof the destination: ")
@@ -120,17 +119,19 @@ def navigate_user(current_lat, current_long):
             print(
                 f"{step['action']} {step['direction']} at {decoded_polyLine[step['offset']]}"
             )
-            # ser.write(bytes(step["direction"], "utf-8"))
+            # if step['direction'] == "left":
+            #     ser.write(bytes("-2", "utf-8"))
+            # elif step['direction'] == "right":
+            #     ser.write(bytes("2", "utf-8"))
         elif step["action"] == "arrive":
             print("Arrived at destination")
-            # ser.write(bytes("stop", "utf-8"))
+            # ser.write(bytes("0", "utf-8"))
             exit(0)
         else:
             print(f"{step['action']} at {decoded_polyLine[step['offset']]}")
-            # ser.write(bytes("forward", "utf-8"))
+            # ser.write(bytes("1", "utf-8"))
         i += 1
         j += 1
-
 
 while True:
     # Receive data from the server
