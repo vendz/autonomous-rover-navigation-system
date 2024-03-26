@@ -6,12 +6,12 @@ import math
 import serial
 import time
 
-arduino_port = "COM6"
-baud = 9600
+# arduino_port = "COM6"
+# baud = 9600
 
-ser = serial.Serial(arduino_port, baud)
-print("Connected to Arduino port:" + arduino_port)
-time.sleep(2)
+# ser = serial.Serial(arduino_port, baud)
+# print("Connected to Arduino port:" + arduino_port)
+# time.sleep(2)
 
 # Change this to the server's IP address and port
 server_ip = "20.197.52.56"
@@ -61,8 +61,8 @@ def get_route(start_coords, destination_coords):
 def initialize():
     # destination_coordinates[0] = input("Enter the latitude of the destination: ")
     # destination_coordinates[1] = input("Enter the longitudeof the destination: ")
-    destination_coordinates[0] = 12.968438991121475
-    destination_coordinates[1] = 79.15594289734427
+    destination_coordinates[0] = 12.970819692361477
+    destination_coordinates[1] = 79.15952504976268
     start_coordinates[0] = current_lat
     start_coordinates[1] = current_long
     get_directions(start_coordinates, destination_coordinates)
@@ -120,14 +120,14 @@ def navigate_user(current_lat, current_long):
             print(
                 f"{step['action']} {step['direction']} at {decoded_polyLine[step['offset']]}"
             )
-            ser.write(bytes(step["direction"], "utf-8"))
+            # ser.write(bytes(step["direction"], "utf-8"))
         elif step["action"] == "arrive":
             print("Arrived at destination")
-            ser.write(bytes("stop", "utf-8"))
+            # ser.write(bytes("stop", "utf-8"))
             exit(0)
         else:
             print(f"{step['action']} at {decoded_polyLine[step['offset']]}")
-            ser.write(bytes("forward", "utf-8"))
+            # ser.write(bytes("forward", "utf-8"))
         i += 1
         j += 1
 
@@ -139,8 +139,14 @@ while True:
     received_data = data.decode("utf-8")
 
     current_coords = received_data.split(",")
-    current_lat = float(current_coords[0])
-    current_long = float(current_coords[1])
+    try:
+        current_lat = float(current_coords[0])
+        current_long = float(current_coords[1])
+    except:
+        current_coords = data.split(",")
+        current_lat = float(current_coords[0])
+        temp = current_coords[1].split(".")
+        temp1 = float(temp[0].strip() + "." + temp[1][:-2])
 
     if steps is None:
         initialize()
