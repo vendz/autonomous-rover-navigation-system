@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link href="/style.css" rel="stylesheet" type="text/css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="module" src="/main.js"></script>
+    <title>Real-time Speech to Text App</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Real-time Stt App</h1>
+
+      <div class="btn-wrapper">
+        <button id="startBtn" class="btn-start">
+          <svg viewBox="0 0 100 100" class="hidden">
+            <!-- Outer circle -->
+            <circle
+              cx="50"
+              cy="50"
+              r="40"
+              stroke="#ccc"
+              stroke-width="5"
+              fill="none"
+            />
+
+            <!-- Inner circle indicating recording -->
+            <circle
+              cx="50"
+              cy="50"
+              r="30"
+              stroke="#ccc"
+              stroke-width="5"
+              fill="none"
+            >
+              <animate
+                attributeName="r"
+                values="30; 25; 30"
+                dur="1.5s"
+                repeatCount="indefinite"
+              />
+            </circle>
+
+            <!-- Record icon in the center -->
+            <circle cx="50" cy="50" r="5" fill="#ccc" />
+          </svg>
+
+          <span> Start Recording </span>
+        </button>
+        <button id="stopBtn" class="btn-stop" disabled>Stop Recording</button>
+      </div>
+
+      <div id="result" class="result"></div>
+    </div>
+    <script>
+      const resultElement = document.getElementById('result');
+const startBtn = document.getElementById('startBtn');
+const animatedSvg = startBtn.querySelector('svg');
+const stopBtn = document.getElementById('stopBtn');
+
+startBtn.addEventListener('click', startRecording);
+stopBtn.addEventListener('click', stopRecording);
+
+let recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (recognition) {
+  recognition = new recognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  recognition.onstart = () => {
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    animatedSvg.classList.remove('hidden');
+    console.log('Recording started');
+  };
+
+  recognition.onresult = function (event) {
+    let result = '';
+
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      if (event.results[i].isFinal) {
+        result += event.results[i][0].transcript + ' ';
+      } else {
+        result += event.results[i][0].transcript;
+      }
+    }
+
+    resultElement.innerText = result;
+
+    if (result.toLowerCase().includes('stop recording')) {
+      resultElement.innerText = result.replace(/stop recording/gi, '');
+      stopRecording();
+    }
+
+    if(result.toLowerCase().trim() == 'right'){
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/speech-to-text');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onload = function() {
+          if (xhr.status === 200) {
+              console.log('Response from server:', xhr.responseText);
+              // You can handle the response from the server here
+          }
+      };
+      xhr.send(JSON.stringify({
+        type: 'voice',
+        data: 1
+      }));
+    }
+  };
+
+  recognition.onerror = function (event) {
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    console.error('Speech recognition error:', event.error);
+  };
+
+  recognition.onend = function () {
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    animatedSvg.classList.add('hidden');
+    console.log('Speech recognition ended');
+  };
+} else {
+  console.error('Speech recognition not supported');
+}
+
+function startRecording() {
+  resultElement.innerText = '';
+  recognition.start();
+}
+
+function stopRecording() {
+  if (recognition) {
+    recognition.stop();
+  }
+}
+    </script>
+  </body>
+</html>

@@ -1,4 +1,5 @@
 import socket
+import json
 
 # Change this to the server's IP address and port
 server_ip = "20.197.52.56"
@@ -16,5 +17,6 @@ while True:
 
     # Decode the received bytes into a string
     received_data = data.decode("utf-8")
+    json_data = json.loads(received_data)
 
-    print(f"Received data from server: {received_data}")
+    print(f"Received data from server: {json_data}")
