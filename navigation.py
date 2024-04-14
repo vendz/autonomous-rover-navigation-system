@@ -7,12 +7,12 @@ import json
 import serial
 import time
 
-# arduino_port = "COM6"
-# baud = 9600
+arduino_port = "COM6"
+baud = 9600
 
-# ser = serial.Serial(arduino_port, baud)
-# print("Connected to Arduino port:" + arduino_port)
-# time.sleep(2)
+ser = serial.Serial(arduino_port, baud)
+print("Connected to Arduino port:" + arduino_port)
+time.sleep(2)
 
 # Change this to the server's IP address and port
 server_ip = "20.197.52.56"
@@ -121,22 +121,22 @@ def navigate_user(current_lat, current_long):
             print(
                 f"{step['action']} {step['direction']} at {decoded_polyLine[step['offset']]}"
             )
-            # if step['direction'] == "left":
-            #     ser.write(bytes("-2", "utf-8"))
-            # elif step['direction'] == "right":
-            #     ser.write(bytes("2", "utf-8"))
+            if step["direction"] == "left":
+                ser.write(bytes("-2", "utf-8"))
+            elif step["direction"] == "right":
+                ser.write(bytes("2", "utf-8"))
         elif step["action"] == "arrive":
             print("Arrived at destination")
-            # ser.write(bytes("0", "utf-8"))
+            ser.write(bytes("0", "utf-8"))
             exit(0)
         else:
             print(f"{step['action']} at {decoded_polyLine[step['offset']]}")
-            # ser.write(bytes("1", "utf-8"))
+            ser.write(bytes("1", "utf-8"))
         i += 1
         j += 1
 
-    # else:
-    #     ser.write(bytes("1", "utf-8"))
+    else:
+        ser.write(bytes("1", "utf-8"))
 
 
 while True:
@@ -154,6 +154,8 @@ while True:
         current_coords = json_data["data"].split(",")
         current_lat = float(current_coords[0])
         current_long = float(current_coords[1])
+    elif json_data["type"] == "detection":
+        ser.write(bytes(json_data["data"], "utf-8"))
 
     if steps is None:
         initialize()
