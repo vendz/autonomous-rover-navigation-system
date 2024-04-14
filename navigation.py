@@ -2,6 +2,7 @@ import socket
 import requests
 import flexpolyline as fp
 import math
+import json
 
 import serial
 import time
@@ -56,6 +57,7 @@ def get_route(start_coords, destination_coords):
     else:
         print(f"Error: {response.status_code}")
         return None
+
 
 def initialize():
     # destination_coordinates[0] = input("Enter the latitude of the destination: ")
@@ -136,20 +138,22 @@ def navigate_user(current_lat, current_long):
     # else:
     #     ser.write(bytes("1", "utf-8"))
 
+
 while True:
-    # Receive data from the server
     data = client_socket.recv(1024)
-
     received_data = data.decode("utf-8")
-
-    current_coords = received_data.split(",")
+    json_data = None
     try:
+        json_data = json.loads(received_data)
+    except json.decoder.JSONDecodeError:
+        end_index = received_data.find("}")
+        first_json_object = received_data[: end_index + 1]
+        json_data = json.loads(first_json_object)
+
+    if json_data["type"] == "location":
+        current_coords = json_data["data"].split(",")
         current_lat = float(current_coords[0])
         current_long = float(current_coords[1])
-    except:
-        current_lat = float(current_coords[0])
-        temp = current_coords[1].split(".")
-        temp1 = float(temp[0].strip() + "." + temp[1][:-2])
 
     if steps is None:
         initialize()
