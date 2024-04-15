@@ -7,7 +7,7 @@ import json
 import serial
 import time
 
-arduino_port = "COM6"
+arduino_port = "COM3"
 baud = 9600
 
 try:
@@ -32,7 +32,7 @@ decoded_polyLine = []
 
 i = 0
 j = 0
-threshold = 0.02
+threshold = 0.2
 
 # Create a socket object
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -126,17 +126,20 @@ def navigate_user(current_lat, current_long):
             )
             if step["direction"] == "left":
                 try:
+                    print("-2")
                     ser.write(bytes("-2", "utf-8"))
                 except Exception as e:
                     print("Error turning left: arduino not connected")
             elif step["direction"] == "right":
                 try:
+                    print("2")
                     ser.write(bytes("2", "utf-8"))
                 except Exception as e:
                     print("Error turning right: arduino not connected")
         elif step["action"] == "arrive":
             print("Arrived at destination")
             try:
+                print("0")
                 ser.write(bytes("0", "utf-8"))
             except Exception as e:
                 print("Error arriving at destination: arduino not connected")
@@ -144,6 +147,7 @@ def navigate_user(current_lat, current_long):
         else:
             print(f"{step['action']} at {decoded_polyLine[step['offset']]}")
             try:
+                print("1")
                 ser.write(bytes("1", "utf-8"))
             except Exception as e:
                 print("Error doing the operation: arduino not connected")
@@ -151,6 +155,7 @@ def navigate_user(current_lat, current_long):
         j += 1
     else:
         try:
+            print("1")
             ser.write(bytes("1", "utf-8"))
         except Exception as e:
             print("Error doing the operation: arduino not connected")
@@ -173,10 +178,24 @@ while True:
         current_long = float(current_coords[1])
     elif json_data["type"] == "detection":
         try:
+            print("detection: ", json_data["data"])
             ser.write(bytes(json_data["data"], "utf-8"))
+            break
         except Exception as e:
             print("Error doing the operation: arduino not connected")
+    elif json_data["type"] == "voice":
+        try:
+            print("voice: ", json_data["data"])
+            
+            ser.write(bytes(json_data["data"], "utf-8"))
+            if json_data["data"] == "0":
+                break
+        except Exception as e:
+            print("Error doing the operation: arduino not connected")
+            # print("")
 
     if steps is None:
         initialize()
     navigate_user(current_lat, current_long)
+
+# ser.write(bytes("0", "utf-8"))
